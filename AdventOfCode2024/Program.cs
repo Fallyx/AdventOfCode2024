@@ -32,7 +32,7 @@ internal class Program
         switch(day)
         {
             case 1:
-                Day01.Day01.Task1();
+                Day01.Day01.Task1and2();
                 break;
         }
 

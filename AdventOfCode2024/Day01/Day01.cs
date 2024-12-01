@@ -1,27 +1,20 @@
-﻿using System.Text.RegularExpressions;
+﻿namespace AdventOfCode2024.Day01;
 
-namespace AdventOfCode2024.Day01;
-
-internal partial class Day01
+internal class Day01
 {
     const string inputPath = @"Day01/Input.txt";
-    [GeneratedRegex(@"(\d+)\s+(\d+)")]
-    private static partial Regex numberRegex();
 
-    internal static void Task1()
+    internal static void Task1and2()
     {
         List<string> lines = [.. File.ReadAllLines(inputPath)];
         List<int> left = new(lines.Count);
         List<int> right = new(lines.Count);
-        
+
         foreach(string line in lines)
         {
-            Match match = numberRegex().Match(line);
-            if (match.Success)
-            {
-                left.Add(int.Parse(match.Groups[1].ToString()));
-                right.Add(int.Parse(match.Groups[2].ToString()));
-            }
+            string[] numbers = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            left.Add(int.Parse(numbers[0]));
+            right.Add(int.Parse(numbers[1]));
         }
 
         left.Sort();
