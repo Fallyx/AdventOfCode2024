@@ -29,7 +29,6 @@ internal class Day05
             else
             {
                 int[] nums = line.Split(',').Select(int.Parse).ToArray();
-                int[] numsP2 = line.Split(',').Select(int.Parse).ToArray();
 
                 bool isValidPage = true;
 
