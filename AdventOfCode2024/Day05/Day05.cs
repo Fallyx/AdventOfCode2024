@@ -19,7 +19,6 @@ internal class Day05
                 continue;
             }
 
-
             if (readPageOrderRules)
             {
                 int[] nums = line.Split('|').Select(int.Parse).ToArray();
@@ -32,61 +31,30 @@ internal class Day05
                 int[] nums = line.Split(',').Select(int.Parse).ToArray();
                 int[] numsP2 = line.Split(',').Select(int.Parse).ToArray();
 
-                midPageNumsP1 += CalcMidPageNumP1(nums);
-                midPageNumsP2 += CalcMidPageNumP2(numsP2);
+                bool isValidPage = true;
+
+                for (int i = nums.Length - 1; i >= 1; i--)
+                {
+                    for (int x = i - 1; x >= 0; x--)
+                    {
+                        if (pageOrderingRules.TryGetValue(nums[i], out List<int> vals) && vals.Contains(nums[x]))
+                        {
+                            isValidPage = false;
+                            (nums[i], nums[x]) = (nums[x], nums[i]);
+                            i++;
+                            break;
+                        }
+                    }
+                }
+
+                if (isValidPage)
+                    midPageNumsP1 += nums[nums.Length / 2];
+                else
+                    midPageNumsP2 += nums[nums.Length / 2];
             }
         }
 
         Console.WriteLine($"Task 1: {midPageNumsP1}");
         Console.WriteLine($"Task 2: {midPageNumsP2}");
-    }
-
-    private static int CalcMidPageNumP1(int[] nums)
-    {
-        bool isValidPage = true;
-
-        for (int i = nums.Length - 1; i >= 1; i--)
-        {
-            for (int x = i - 1; x >= 0; x--)
-            {
-                if (pageOrderingRules.TryGetValue(nums[i], out List<int> vals))
-                {
-                    if (vals.Contains(nums[x]))
-                    {
-                        isValidPage = false;
-                        break;
-                    }
-                }
-            }
-
-            if (!isValidPage)
-                break;
-        }
-
-        return (isValidPage ? nums[nums.Length / 2] : 0);
-    }
-
-    private static int CalcMidPageNumP2(int[] nums)
-    {
-        bool isValidPage = true;
-
-        for (int i = nums.Length - 1; i >= 1; i--)
-        {
-            for (int x = i - 1; x >= 0; x--)
-            {
-                if (pageOrderingRules.TryGetValue(nums[i], out List<int> vals))
-                {
-                    if (vals.Contains(nums[x]))
-                    {
-                        isValidPage = false;
-                        (nums[i], nums[x]) = (nums[x], nums[i]);
-                        i++;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return (!isValidPage ? nums[nums.Length / 2] : 0);
     }
 }
