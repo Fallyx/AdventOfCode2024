@@ -7,7 +7,7 @@ internal class Day06
     const string inputPath = @"Day06/Input.txt";
     static int xMax;
     static int yMax;
-    private static readonly Vector2[] cycle = [new Vector2(0, -1), new Vector2(1, 0), new Vector2(0, 1), new Vector2(-1, 0)];
+    private static readonly Vector2[] cycles = [new Vector2(0, -1), new Vector2(1, 0), new Vector2(0, 1), new Vector2(-1, 0)];
 
     internal static void Task1and2()
     {
@@ -32,45 +32,71 @@ internal class Day06
             y++;
         }
 
-        HashSet<Vector2> visited = Task1(currentPos, obstacles);
-     //   Task2(currentPos, obstacles, [.. visited]);
+        List<VisitedFieldRec> visitedFieldsList = Task1(currentPos, obstacles);
+        Task2(currentPos, obstacles, visitedFieldsList);
     }
 
-    private static HashSet<Vector2> Task1(Vector2 currentPos, HashSet<Vector2> obstacles)
+    private static List<VisitedFieldRec> Task1(Vector2 currentPos, HashSet<Vector2> obstacles)
     {
-        HashSet<Vector2> visited = [];
+        Vector2 startPos = currentPos;
+        HashSet<VisitedFieldRec> visitedFields = [];
         int cyclePos = 0;
 
         while (currentPos.X >= 0 && currentPos.X <= xMax && currentPos.Y >= 0 && currentPos.Y <= yMax)
         {
-            visited.Add(currentPos);
-            Vector2 nextPos = currentPos + cycle[cyclePos];
+            visitedFields.Add(new VisitedFieldRec(currentPos, cycles[cyclePos]));
+            Vector2 nextPos = currentPos + cycles[cyclePos];
             if (obstacles.Contains(nextPos))
                 cyclePos = (cyclePos + 1) % 4;
             else
                 currentPos = nextPos;
         }
 
-        Console.WriteLine($"Task 1: {visited.Count}");
+        Console.WriteLine($"Task 1: {visitedFields.ToList().Select(vf => vf.Pos).Distinct().Count()}");
 
-        return visited;
+        return [.. visitedFields];
     }
 
-    private static void Task2(Vector2 currentPos, HashSet<Vector2> obstacles, List<Vector2> walkingPath)
+    private static void Task2(Vector2 currentPos, HashSet<Vector2> obstacles, List<VisitedFieldRec> visiteds)
     {
-        HashSet<VisitedField> visited = [];
-        int cyclePos = 0;
+        Vector2 startPos = currentPos;
+        HashSet<Vector2> newObstacleSet = [];
 
-        for (int i = 1; i < walkingPath.Count; i++)
+        for (int i = 0; i < visiteds.Count - 1; i++)
         {
-            Console.WriteLine(walkingPath[i]);
+            HashSet<VisitedFieldRec> visitedFieldsWithCycle = [];
+            Vector2 newObstacle = visiteds[i].Pos + visiteds[i].Dir;
+
+            if (newObstacleSet.Contains(newObstacle))
+                continue;
+
+            currentPos = startPos;
+            int cyclePos = 0;
+            bool isCycle = false;
+
+            while (currentPos.X >= 0 && currentPos.X <= xMax && currentPos.Y >= 0 && currentPos.Y <= yMax)
+            {
+                if (visitedFieldsWithCycle.Add(new VisitedFieldRec(currentPos, cycles[cyclePos])))
+                {
+                    Vector2 nextPos = currentPos + cycles[cyclePos];
+                    if (obstacles.Contains(nextPos) || newObstacle == nextPos)
+                        cyclePos = (cyclePos + 1) % 4;
+                    else
+                        currentPos = nextPos;
+                }
+                else
+                {
+                    isCycle = true;
+                    break;
+                }
+            }
+
+            if (isCycle)
+                newObstacleSet.Add(newObstacle);
         }
 
+        Console.WriteLine($"Task 2: {newObstacleSet.Count}");
     }
 
-    internal class VisitedField(Vector2 pos, Vector2 dir)
-    {
-        Vector2 Pos = pos;
-        Vector2 Dir = dir;
-    }
+    internal record VisitedFieldRec(Vector2 Pos, Vector2 Dir) { }
 }
