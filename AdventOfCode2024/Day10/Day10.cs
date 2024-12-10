@@ -12,12 +12,15 @@ internal class Day10
         new Vector2(1, 0),
         new Vector2(0, 1),
     ];
+    private static HashSet<Vector2> pathsP1 = [];
+    private static List<Vector2> pathsP2 = [];
 
     private static List<Vector2> validPaths = [];
 
     internal static void Task1and2()
     {
         Dictionary<int, List<Vector2>> topoMap = [];
+
         int y = 0;
 
         foreach (string line in File.ReadLines(inputPath))
