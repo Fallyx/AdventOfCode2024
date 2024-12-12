@@ -27,14 +27,14 @@ internal class Day11
         Console.WriteLine($"Task 2: {count}");
     }
 
-    private static long MemoCycle(long pebble, int blinks, int maxBlinks)
+    private static long MemoCycle(long stoneNumber, int blinks, int maxBlinks)
     {
-        StoneMemo p = new(pebble, blinks);
-        if (memo.TryGetValue(p, out long value))
-            return value;
+        StoneMemo stoneMemo = new(stoneNumber, blinks);
+        if (memo.TryGetValue(stoneMemo, out long stoneCount))
+            return stoneCount;
 
-        long result = Cycle(pebble, blinks, maxBlinks);
-        memo.Add(p, result);
+        long result = Cycle(stoneNumber, blinks, maxBlinks);
+        memo.Add(stoneMemo, result);
         return result;
     }
 
@@ -44,7 +44,7 @@ internal class Day11
             return 1;
 
         if (stoneNumber == 0)
-            return MemoCycle(1, blinks+1, maxBlinks);
+            return MemoCycle(1, blinks + 1, maxBlinks);
         else if (stoneNumber.ToString().Length % 2 == 0)
         {
             string numStr = stoneNumber.ToString();
@@ -55,8 +55,8 @@ internal class Day11
             return MemoCycle(numLeft, blinks + 1, maxBlinks) + MemoCycle(numRight, blinks + 1, maxBlinks);
         }
 
-        return MemoCycle(stoneNumber * 2024, blinks+1, maxBlinks);
+        return MemoCycle(stoneNumber * 2024, blinks + 1, maxBlinks);
     }
 
-    internal record StoneMemo(long number, int blinks) { }
+    internal record StoneMemo(long Number, int Blinks) { }
 }
