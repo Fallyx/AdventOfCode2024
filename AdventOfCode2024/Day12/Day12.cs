@@ -31,7 +31,6 @@ internal class Day12
             y++;
         }
 
-        Console.WriteLine();
         int totalPriceP1 = 0;
         int totalPriceP2 = 0;
         foreach (KeyValuePair<char, List<Vector2>> gPos in gardenPos)
