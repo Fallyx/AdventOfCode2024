@@ -6,8 +6,6 @@ namespace AdventOfCode2024.Day15;
 internal class Day15
 {
     private const string inputPath = @"Day15/Input.txt";
-    private static int xMax;
-    private static int yMax;
     private static readonly List<Vector2> dirs =
     [
         new Vector2(0, -1),
@@ -18,44 +16,55 @@ internal class Day15
 
     internal static void Task1and2()
     {
-        IEnumerable<string> lines = File.ReadLines(inputPath);
-        xMax = lines.First().Length - 1;
-        yMax = lines.Count(l => l.StartsWith('#')) - 1;
+        Task1();
+        Task2();
+    }
+
+    private static void Task1()
+    {
         HashSet<Vector2> walls = [];
         List<Vector2> boxes = [];
-        Vector2 robotPos = new();
-        string commands;
-        bool isMap = true;
+        (Vector2 robotPos, int maxX, int maxY, string commands) = BuildMap(boxes, walls, false);
 
-        StringBuilder sb = new();
-        int y = 0;
-        foreach(string line in lines)
+        PrintMap(robotPos, boxes, walls, maxX, maxY, false);
+
+        RunCommands(commands, robotPos, boxes, walls, false);
+
+        int gpsSum = 0;
+
+        foreach (Vector2 box in boxes)
         {
-            if (line.Length == 0)
-                isMap = false;
-            else if (isMap)
-            {
-                for (int x = 0; x < line.Length; x++)
-                {
-                    if (line[x] == '#')
-                        walls.Add(new Vector2(x, y));
-                    else if (line[x] == 'O')
-                        boxes.Add(new Vector2(x, y));
-                    else if (line[x] == '@')
-                        robotPos = new Vector2(x, y);
-                }
-                y++;
-            }
-            else
-            {
-                sb.Append(line);
-            }
+            gpsSum += (int)(box.X + box.Y * 100);
         }
-        commands = sb.ToString();
 
-        PrintMap(robotPos, boxes, walls);
+        Console.WriteLine($"Task 1: {gpsSum}");
+    }
 
-        foreach(char c in commands)
+    private static void Task2()
+    {
+        HashSet<Vector2> walls = [];
+        List<Vector2> boxes = [];
+        (Vector2 robotPos, int maxX, int maxY, string commands) = BuildMap(boxes, walls, true);
+
+        PrintMap(robotPos, boxes, walls, maxX, maxY, true);
+
+        RunCommands(commands, robotPos, boxes, walls, true, maxX, maxY, true);
+
+        PrintMap(robotPos, boxes, walls, maxX, maxY, true);
+
+        int gpsSum = 0;
+
+        foreach (Vector2 box in boxes)
+        {
+            gpsSum += (int)(box.X + box.Y * 100);
+        }
+
+        Console.WriteLine($"Task 1: {gpsSum}");
+    }
+
+    private static void RunCommands(string commands, Vector2 robotPos, List<Vector2> boxes, HashSet<Vector2> walls, bool isPart2, int maxX = 0, int maxY = 0, bool printMap = false)
+    {
+        foreach (char c in commands)
         {
             Vector2 dir = new();
             if (c == '^')
@@ -67,22 +76,16 @@ internal class Day15
             else if (c == '<')
                 dir = dirs[2];
 
-        //    Console.WriteLine($"command={c}, dir={dir}");
+            if (printMap)
+                Console.WriteLine($"command={c}, dir={dir}");
+
             Vector2 nextPos = robotPos + dir;
             if (CanMove(nextPos, dir, boxes, walls))
                 robotPos = nextPos;
 
-        //    PrintMap(robotPos, boxes, walls);
+            if (printMap)
+                PrintMap(robotPos, boxes, walls, maxX, maxY, isPart2);
         }
-
-        int gpsSum = 0;
-
-        foreach(Vector2 box in boxes)
-        {
-            gpsSum += (int)(box.X + box.Y * 100);
-        }
-
-        Console.WriteLine($"Task 1: {gpsSum}");
     }
 
     private static bool CanMove(Vector2 nextPos, Vector2 dir, List<Vector2> boxes, HashSet<Vector2> walls)
@@ -105,17 +108,84 @@ internal class Day15
         }
     }
 
-    private static void PrintMap(Vector2 robotPos, List<Vector2> boxes, HashSet<Vector2> walls)
+    private static (Vector2 robotPos, int maxX, int maxY, string commands) BuildMap(List<Vector2> boxes, HashSet<Vector2> walls, bool isPart2)
     {
-        for (int y = 0; y <= yMax; y++)
+        IEnumerable<string> lines = File.ReadLines(inputPath);
+        int x = 0;
+        int y = 0;
+        StringBuilder sb = new();
+        bool isMap = true;
+        Vector2 robotPos = new();
+
+        foreach (string line in lines)
         {
-            for (int x = 0; x <= xMax; x++)
+            if (line.Length == 0)
+                isMap = false;
+            else if (isMap)
+            {
+                x = 0;
+                for (int c = 0; c < line.Length; c++)
+                {
+                    if (line[c] == '#')
+                    {
+                        walls.Add(new Vector2(x, y));
+                        if (isPart2)
+                            walls.Add(new Vector2(++x, y));
+                    }
+                    else if (line[c] == 'O')
+                    {
+                        boxes.Add(new Vector2(x, y));
+                        if (isPart2)
+                            boxes.Add(new Vector2(++x, y));
+                    }
+                    else
+                    {
+                        if (line[c] == '@')
+                            robotPos = new Vector2(x, y);
+                        if (isPart2)
+                            x++;
+                    }
+                    x++;
+                }
+                y++;
+            }
+            else
+            {
+                sb.Append(line);
+            }
+        }
+
+        return (robotPos, --x, --y, sb.ToString());
+    }
+
+    private static void PrintMap(Vector2 robotPos, List<Vector2> boxes, HashSet<Vector2> walls, int maxX, int maxY, bool isPart2)
+    {
+        bool isFirstBox = true;
+        for (int y = 0; y <= maxY; y++)
+        {
+            for (int x = 0; x <= maxX; x++)
             {
                 Vector2 currentPos = new(x, y);
                 if (currentPos == robotPos)
                     Console.Write('@');
                 else if (boxes.Contains(currentPos))
-                    Console.Write('O');
+                {
+                    if (!isPart2)
+                        Console.Write('O');
+                    else
+                    {
+                        if(isFirstBox)
+                        {
+                            Console.Write('[');
+                            isFirstBox = false;
+                        }
+                        else
+                        {
+                            Console.Write(']');
+                            isFirstBox = true;
+                        }
+                    }
+                }
                 else if (walls.Contains(currentPos))
                     Console.Write('#');
                 else
@@ -125,5 +195,12 @@ internal class Day15
         }
 
         Console.WriteLine("\n\n");
+    }
+
+    internal record class Box(Vector2 Left, Vector2 Right, bool IsPart2)
+    {
+        public Vector2 Left { get; set; } = Left;
+        public Vector2 Right { get; set; } = Right;
+        public bool IsPart2 { get; set; } = IsPart2;
     }
 }
