@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace AdventOfCode2024.Day13;
+﻿namespace AdventOfCode2024.Day13;
 
 internal class Day13
 {

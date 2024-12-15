@@ -73,6 +73,9 @@ internal class Program
             case 14:
                 Day14.Day14.Task1and2();
                 break;
+            case 15:
+                Day15.Day15.Task1and2();
+                break;
         }
 
         stopwatch.Stop();
