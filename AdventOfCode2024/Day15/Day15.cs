@@ -6,6 +6,10 @@ namespace AdventOfCode2024.Day15;
 internal class Day15
 {
     private const string inputPath = @"Day15/Input.txt";
+    private const string colorWhite = "\x1b[39m";
+    private const string colorRed = "\x1b[91m";
+    private const string colorYellow = "\x1b[93m";
+    private const string colorCyan = "\x1b[96m";
     private static readonly List<Vector2> dirs =
     [
         new Vector2(0, -1),
@@ -23,11 +27,12 @@ internal class Day15
 
     private static void Task1()
     {
+        bool printMap = false;
         HashSet<Vector2> walls = [];
         List<Box> boxes = [];
         (Vector2 robotPos, int maxX, int maxY, string commands) = BuildMap(boxes, walls, false);
 
-        RunCommandsP1(commands, robotPos, boxes, walls);
+        RunCommandsP1(commands, robotPos, boxes, walls, maxX, maxY, printMap);
 
         int gpsSum = 0;
 
@@ -41,11 +46,12 @@ internal class Day15
 
     private static void Task2()
     {
+        bool printMap = false;
         HashSet<Vector2> walls = [];
         List<Box> boxes = [];
         (Vector2 robotPos, int maxX, int maxY, string commands) = BuildMap(boxes, walls, true);
 
-        RunCommandsP2(commands, robotPos, boxes, walls, maxX, maxY, false);
+        RunCommandsP2(commands, robotPos, boxes, walls, maxX, maxY, printMap);
 
         int gpsSum = 0;
 
@@ -57,7 +63,7 @@ internal class Day15
         Console.WriteLine($"Task 2: {gpsSum}");
     }
 
-    private static void RunCommandsP1(string commands, Vector2 robotPos, List<Box> boxes, HashSet<Vector2> walls, int maxX = 0, int maxY = 0, bool printMap = false)
+    private static void RunCommandsP1(string commands, Vector2 robotPos, List<Box> boxes, HashSet<Vector2> walls, int maxX, int maxY, bool printMap)
     {
         foreach (char c in commands)
         {
@@ -71,15 +77,12 @@ internal class Day15
             else if (c == '<')
                 dir = dirs[2];
 
-            if (printMap)
-                Console.WriteLine($"command={c}, dir={dir}");
-
             Vector2 nextPos = robotPos + dir;
             if (CanMoveP1(nextPos, dir, boxes, walls))
                 robotPos = nextPos;
 
             if (printMap)
-                PrintMap(robotPos, boxes, walls, maxX, maxY, false);
+                PrintMap(robotPos, boxes, walls, c, maxX, maxY, false);
         }
     }
 
@@ -104,9 +107,6 @@ internal class Day15
             else if (c == '<')
                 dir = dirs[2];
 
-            if (printMap)
-                Console.WriteLine($"command={c}, dir={dir}");
-
             Vector2 nextPos = robotPos + dir;
             if ((isVert && CanMoveVerticalP2(nextPos, dir, boxes, walls)) || (!isVert && CanMoveHorizontalP2(nextPos, dir, boxes, walls)))
             {
@@ -120,14 +120,9 @@ internal class Day15
 
             idxs = [];
 
-            
             if (printMap)
-                PrintMap(robotPos, boxes, walls, maxX, maxY, true);
-            
+                PrintMap(robotPos, boxes, walls, c, maxX, maxY, true);
         }
-
-        if (printMap)
-            PrintMap(robotPos, boxes, walls, maxX, maxY, true);
     }
 
     private static bool CanMoveP1(Vector2 nextPos, Vector2 dir, List<Box> boxes, HashSet<Vector2> walls)
@@ -239,8 +234,8 @@ internal class Day15
                     }
                     else if (line[c] == 'O')
                     {
-                        Vector2 left = new Vector2(x, y);
-                        Vector2 right = (isPart2 ? new Vector2(++x, y) : new(-1, -1));
+                        Vector2 left = new(x, y);
+                        Vector2 right = (isPart2 ? new(++x, y) : new(-1, -1));
                         boxes.Add(new(left, right));
                     }
                     else
@@ -263,44 +258,38 @@ internal class Day15
         return (robotPos, --x, --y, sb.ToString());
     }
 
-    private static void PrintMap(Vector2 robotPos, List<Box> boxes, HashSet<Vector2> walls, int maxX, int maxY, bool isPart2)
+    private static void PrintMap(Vector2 robotPos, List<Box> boxes, HashSet<Vector2> walls, char command, int maxX, int maxY, bool isPart2)
     {
-        Console.Clear();
+        StringBuilder sb = new();
+        sb.Append($"Command = {command}\n\n");
         for (int y = 0; y <= maxY; y++)
         {
             for (int x = 0; x <= maxX; x++)
             {
                 Vector2 currentPos = new(x, y);
                 if (currentPos == robotPos)
-                {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write('@');
-                    Console.ResetColor();
-                }
+                    sb.Append(colorRed).Append('@').Append(colorWhite);
                 else if (boxes.Select(b => b.Left).Contains(currentPos))
                 {
-                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    sb.Append(colorYellow);
                     if (!isPart2)
-                        Console.Write('O');
+                        sb.Append('O');
                     else
-                        Console.Write('[');
-                    Console.ResetColor();
+                        sb.Append('[');
+                    sb.Append(colorWhite);
                 }
                 else if (boxes.Select(b => b.Right).Contains(currentPos))
-                    Console.Write(']');
+                    sb.Append(colorYellow).Append(']').Append(colorWhite);
                 else if (walls.Contains(currentPos))
-                {
-                    Console.ForegroundColor = ConsoleColor.DarkCyan;
-                    Console.Write('#');
-                    Console.ResetColor();
-                }
+                    sb.Append(colorCyan).Append('#').Append(colorWhite);
                 else
-                    Console.Write('.');
+                    sb.Append('.');
             }
-            Console.WriteLine();
+            sb.AppendLine();
         }
 
-        Console.WriteLine("\n\n");
+        Console.Clear();
+        Console.WriteLine(sb.ToString());
         Thread.Sleep(500);
     }
 
