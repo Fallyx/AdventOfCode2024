@@ -52,32 +52,14 @@ internal class Day18
             currentNode = queue.Dequeue();
             int newScore = currentNode.Score + 1;
 
-            Vector2 north = currentNode.Pos + dirs[0];
-            if (!visited.ContainsKey(north) && !IsOuterBounds(north))
+            for (int i = 0; i < dirs.Count; i++)
             {
-                queue.Enqueue(new(north, newScore));
-                visited.Add(north, newScore);
-            }
-
-            Vector2 south = currentNode.Pos + dirs[1];
-            if (!visited.ContainsKey(south) && !IsOuterBounds(south))
-            {
-                queue.Enqueue(new(south, newScore));
-                visited.Add(south, newScore);
-            }
-
-            Vector2 east = currentNode.Pos + dirs[2];
-            if (!visited.ContainsKey(east) && !IsOuterBounds(east))
-            {
-                queue.Enqueue(new(east, newScore));
-                visited.Add(east, newScore);
-            }
-
-            Vector2 west = currentNode.Pos + dirs[3];
-            if (!visited.ContainsKey(west) && !IsOuterBounds(west))
-            {
-                queue.Enqueue(new(west, newScore));
-                visited.Add(west, newScore);
+                Vector2 neighbor = currentNode.Pos + dirs[i];
+                if (!visited.ContainsKey(neighbor) && !(neighbor.X < 0 || neighbor.X > maxX || neighbor.Y < 0 || neighbor.Y > maxY))
+                {
+                    queue.Enqueue(new(neighbor, newScore));
+                    visited.Add(neighbor, newScore);
+                }
             }
         }
 
@@ -85,13 +67,5 @@ internal class Day18
         return steps;
     }
 
-    private static bool IsOuterBounds(Vector2 position)
-    {
-        return (position.X < 0 || position.X > maxX || position.Y < 0 || position.Y > maxY);
-    }
-
-    internal record Node(Vector2 Pos, Int32 Score)
-    {
-        public Int32 Score { get; set; } = Score;
-    }
+    internal record Node(Vector2 Pos, Int32 Score);
 }
