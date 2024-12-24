@@ -12,15 +12,11 @@ internal class Day23
         {
             string[] pcs = line.Split('-', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
-            if (connections.TryGetValue(pcs[0], out List<string> values1))
-                values1.Add(pcs[1]);
-            else
-                connections.Add(pcs[0], [pcs[1]]);
+            if (!connections.TryAdd(pcs[0], [pcs[1]]))
+                connections[pcs[0]].Add(pcs[1]);
 
-            if (connections.TryGetValue(pcs[1], out List<string> values2))
-                values2.Add(pcs[0]);
-            else
-                connections.Add(pcs[1], [pcs[0]]);
+            if (!connections.TryAdd(pcs[1], [pcs[0]]))
+                connections[pcs[1]].Add(pcs[0]);
         }
 
         int threeInterconnectedPcs = Part1(connections);
