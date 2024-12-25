@@ -104,6 +104,9 @@ internal class Program
                 Day24.Day24.Task1and2();
                 Day24.Day24GVIZ.Task2();
                 break;
+            case 25:
+                Day25.Day25.Task1();
+                break;
         }
 
         stopwatch.Stop();
